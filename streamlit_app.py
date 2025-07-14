@@ -39,7 +39,7 @@ with tab1:
     st.markdown("""
     <div style='text-align: center; padding: 20px; background: linear-gradient(90deg, #1f77b4, #ff7f0e); border-radius: 10px; margin-bottom: 30px;'>
         <h1 style='color: white; margin: 0; font-size: 2.5rem;'>NCAAB NBA Success Predictor</h1>
-        <p style='color: white; margin: 10px 0 0 0; font-size: 1.2rem;'>Machine Learning Model for Basketball Analytics</p>
+        <p style='color: white; margin: 10px 0 0 0; font-size: 1.2rem;'>Model for Basketball Analytics</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -69,7 +69,7 @@ with tab1:
     <div style='background-color: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin: 20px 0;'>
         <h2 style='color: #1f77b4; border-bottom: 2px solid #e1e5e9; padding-bottom: 10px;'>📊 Overview</h2>
         <p style='font-size: 1.1rem; line-height: 1.6; color: #333;'>
-            This machine learning model predicts <strong>NBA success in the first four years</strong> of a player's career based on their college basketball statistics and performance. Important to note that if the player either did not play college basketball, or did not play 15 games of college basketball, they will not have a prediction.
+            This  model predicts <strong>NBA success in the first four years</strong> of a player's career based on their college basketball statistics and performance. Important to note that if the player either did not play college basketball, or did not play 15 games of college basketball, they will not have a prediction.
         </p>
     </div>
     """, unsafe_allow_html=True)
