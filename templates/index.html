@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCAAB NBA Success Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        
+        .section h2 {
+            color: #555;
+            margin-top: 0;
+        }
+        
+        input, select, button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        .prediction-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #e9ecef;
+        }
+        
+        .high-prob { background-color: #d4edda; border-left: 4px solid #28a745; }
+        .medium-prob { background-color: #fff3cd; border-left: 4px solid #ffc107; }
+        .low-prob { background-color: #f8d7da; border-left: 4px solid #dc3545; }
+        
+        .feature-breakdown {
+            margin-top: 15px;
+        }
+        
+        .feature-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .autocomplete {
+            position: relative;
+        }
+        
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ccc;
+            border-top: none;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .autocomplete-suggestion {
+            padding: 10px;
+            cursor: pointer;
+        }
+        
+        .autocomplete-suggestion:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .cluster-info {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e3f2fd;
+            border-radius: 4px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .form-row label {
+            min-width: 150px;
+            font-weight: bold;
+        }
+        
+        .form-row input {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏀 NCAAB NBA Success Predictor</h1>
+        <p style="text-align: center; color: #666;">
+            Predict NBA success probability (VORP > 4 in first 4 seasons) using college basketball stats
+        </p>
+        
+        <!-- Player Search Section -->
+        <div class="section">
+            <h2>🔍 Search Player</h2>
+            <p>Search for a player by name to get their prediction:</p>
+            
+            <div class="autocomplete">
+                <input type="text" id="playerSearch" placeholder="Enter player name (e.g., Shai Gilgeous-Alexander)" 
+                       style="width: 300px;">
+                <div id="suggestions" class="autocomplete-suggestions" style="display: none;"></div>
+            </div>
+            
+            <button onclick="searchPlayer()">Get Prediction</button>
+            
+            <div id="playerResult"></div>
+        </div>
+        
+        <!-- Manual Input Section -->
+        <div class="section">
+            <h2>📊 Manual Stats Input</h2>
+            <p>Enter stats manually for prediction:</p>
+            
+            <div class="form-row">
+                <label>Play Style Cluster:</label>
+                <select id="cluster" onchange="updateClusterInfo()">
+                    <option value="0">Cluster 0 - Big Men/Centers</option>
+                    <option value="1" selected>Cluster 1 - Forwards</option>
+                    <option value="2">Cluster 2 - Guards</option>
+                </select>
+            </div>
+            
+            <div id="clusterInfo" class="cluster-info"></div>
+            
+            <!-- Feature inputs will be populated based on cluster -->
+            <div id="featureInputs"></div>
+            
+            <button onclick="predictManual()">Calculate Prediction</button>
+            
+            <div id="manualResult"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentCluster = 1;
+        
+        // Initialize
+        updateClusterInfo();
+        
+        // Autocomplete for player search
+        document.getElementById('playerSearch').addEventListener('input', function() {
+            const query = this.value;
+            if (query.length < 2) {
+                document.getElementById('suggestions').style.display = 'none';
+                return;
+            }
+            
+            fetch(`/search_suggestions?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(suggestions => {
+                    const suggestionsDiv = document.getElementById('suggestions');
+                    if (suggestions.length > 0) {
+                        suggestionsDiv.innerHTML = suggestions.map(name => 
+                            `<div class="autocomplete-suggestion" onclick="selectPlayer('${name}')">${name}</div>`
+                        ).join('');
+                        suggestionsDiv.style.display = 'block';
+                    } else {
+                        suggestionsDiv.style.display = 'none';
+                    }
+                });
+        });
+        
+        function selectPlayer(name) {
+            document.getElementById('playerSearch').value = name;
+            document.getElementById('suggestions').style.display = 'none';
+        }
+        
+        function searchPlayer() {
+            const playerName = document.getElementById('playerSearch').value.trim();
+            if (!playerName) {
+                alert('Please enter a player name');
+                return;
+            }
+            
+            fetch('/predict_player', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({player_name: playerName})
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayPlayerResult(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('playerResult').innerHTML = '<div class="prediction-result">Error occurred</div>';
+            });
+        }
+        
+        function displayPlayerResult(data) {
+            const resultDiv = document.getElementById('playerResult');
+            
+            if (data.error) {
+                resultDiv.innerHTML = `<div class="prediction-result">${data.error}</div>`;
+                return;
+            }
+            
+            const prob = data.probability;
+            const probClass = prob >= 0.6 ? 'high-prob' : prob >= 0.3 ? 'medium-prob' : 'low-prob';
+            const percentage = (prob * 100).toFixed(1);
+            
+            resultDiv.innerHTML = `
+                <div class="prediction-result ${probClass}">
+                    <h3>${data.player_name}</h3>
+                    <p><strong>Team:</strong> ${data.team} (${data.year})</p>
+                    <p><strong>Play Style:</strong> Cluster ${data.cluster}</p>
+                    <p><strong>NBA Success Probability:</strong> ${percentage}%</p>
+                    <p><strong>Actual Outcome:</strong> ${data.actual}</p>
+                </div>
+            `;
+        }
+        
+        function updateClusterInfo() {
+            const cluster = document.getElementById('cluster').value;
+            currentCluster = parseFloat(cluster);
+            
+            fetch(`/get_cluster_info/${cluster}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('clusterInfo').innerHTML = `
+                        <strong>${data.description}</strong><br>
+                        Required features: ${data.features.join(', ')}
+                    `;
+                    createFeatureInputs(data.features);
+                });
+        }
+        
+        function createFeatureInputs(features) {
+            const inputsDiv = document.getElementById('featureInputs');
+            
+            // Default values for features
+            const defaults = {
+                'Player_Encoded': 2,
+                'LogAst/TO': 0.5,
+                'DraftValue': 0.5,
+                'LogBlk': 1.0,
+                'LogREB': 3.0,
+                'LogFT%': 0.6,
+                'Logclose_volume_x_pct': 4.0,
+                'LogStl': 1.0,
+                'LogDR': 2.5,
+                'LogAst': 2.5,
+                'Logthree_volume_x_pct': 3.0
+            };
+            
+            inputsDiv.innerHTML = features.map(feature => `
+                <div class="form-row">
+                    <label>${feature}:</label>
+                    <input type="number" id="${feature}" step="0.01" 
+                           value="${defaults[feature] || 0}" 
+                           placeholder="Enter ${feature}">
+                </div>
+            `).join('');
+        }
+        
+        function predictManual() {
+            const cluster = currentCluster;
+            const inputs = {cluster: cluster};
+            
+            // Get all feature inputs
+            const featureInputs = document.querySelectorAll('#featureInputs input');
+            featureInputs.forEach(input => {
+                inputs[input.id] = parseFloat(input.value) || 0;
+            });
+            
+            fetch('/predict_manual', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(inputs)
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayManualResult(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('manualResult').innerHTML = '<div class="prediction-result">Error occurred</div>';
+            });
+        }
+        
+        function displayManualResult(data) {
+            const resultDiv = document.getElementById('manualResult');
+            
+            if (data.error) {
+                resultDiv.innerHTML = `<div class="prediction-result">${data.error}</div>`;
+                return;
+            }
+            
+            const prob = data.adjusted_probability || data.probability;
+            const probClass = prob >= 0.6 ? 'high-prob' : prob >= 0.3 ? 'medium-prob' : 'low-prob';
+            const percentage = (prob * 100).toFixed(1);
+            
+            let html = `
+                <div class="prediction-result ${probClass}">
+                    <h3>Prediction Result</h3>
+                    <p><strong>Cluster:</strong> ${data.cluster}</p>
+                    <p><strong>NBA Success Probability:</strong> ${percentage}%</p>
+                    <p><strong>Logit Total:</strong> ${data.logit_total.toFixed(4)}</p>
+            `;
+            
+            if (data.adjusted_probability) {
+                html += `<p><strong>Original:</strong> ${(data.probability * 100).toFixed(1)}% → <strong>Adjusted:</strong> ${percentage}%</p>`;
+            }
+            
+            html += `
+                    <div class="feature-breakdown">
+                        <h4>Feature Contributions:</h4>
+            `;
+            
+            data.feature_breakdown.forEach(item => {
+                const contribution = item.contribution >= 0 ? '+' : '';
+                html += `
+                    <div class="feature-item">
+                        <span><strong>${item.feature}:</strong> ${item.raw_value.toFixed(3)}</span>
+                        <span>${contribution}${item.contribution.toFixed(4)}</span>
+                    </div>
+                `;
+            });
+            
+            html += `</div></div>`;
+            resultDiv.innerHTML = html;
+        }
+        
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.autocomplete')) {
+                document.getElementById('suggestions').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
