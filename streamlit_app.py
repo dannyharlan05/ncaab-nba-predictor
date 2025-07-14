@@ -77,6 +77,13 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
     
+    # Usage tip
+    st.markdown("""
+    <div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin: 20px 0;'>
+        <strong style='color: #856404;'>💡 Usage Tip:</strong> When you first interact with any feature (search, filters, etc.), the page will reset to this home tab. After that first interaction, you can navigate freely between tabs without any resets.
+    </div>
+    """, unsafe_allow_html=True)
+    
 
 with tab2:
     # Header with styling
@@ -90,7 +97,7 @@ with tab2:
     st.markdown("""
     <div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #1f77b4; margin-bottom: 20px;'>
         <strong style='color: #1f77b4;'>Model Training:</strong> This model was trained on data from 2010-2018<br>
-        <strong style='color: #1f77b4;'>Ratings:</strong> Rankings calculated from full 2010-2025 dataset for statistical accuracy
+        <strong style='color: #1f77b4;'>Ratings:</strong> Rating calculated and available for players drafted from 2019-2025
     </div>
     """, unsafe_allow_html=True)
     
@@ -192,11 +199,11 @@ with tab2:
                 if rating >= 0.9:
                     color = "#006400"
                     bg_color = "#d4edda"
-                    badge = "SUPERSTAR"
+                    badge = "ELITE"
                 elif rating >= 0.8:
                     color = "#228b22"
                     bg_color = "#d4edda"
-                    badge = "ELITE"
+                    badge = "GREAT"
                 elif rating >= 0.7:
                     color = "#32cd32"
                     bg_color = "#e8f5e8"
@@ -368,11 +375,11 @@ with tab3:
                         if rating1 >= 0.9:
                             color1 = "#006400"
                             bg_color1 = "#d4edda"
-                            badge1 = "SUPERSTAR"
+                            badge1 = "ELITE"
                         elif rating1 >= 0.8:
                             color1 = "#228b22"
                             bg_color1 = "#d4edda"
-                            badge1 = "ELITE"
+                            badge1 = "GREAT"
                         elif rating1 >= 0.7:
                             color1 = "#32cd32"
                             bg_color1 = "#e8f5e8"
@@ -484,11 +491,11 @@ with tab3:
                         if rating2 >= 0.9:
                             color2 = "#006400"
                             bg_color2 = "#d4edda"
-                            badge2 = "SUPERSTAR"
+                            badge2 = "ELITE"
                         elif rating2 >= 0.8:
                             color2 = "#228b22"
                             bg_color2 = "#d4edda"
-                            badge2 = "ELITE"
+                            badge2 = "GREAT"
                         elif rating2 >= 0.7:
                             color2 = "#32cd32"
                             bg_color2 = "#e8f5e8"
@@ -898,10 +905,10 @@ with tab5:
                     # Color coding based on rating - 8 granular categories
                     if rating >= 0.9:
                         color = "#006400"
-                        badge = "SUPERSTAR"
+                        badge = "ELITE"
                     elif rating >= 0.8:
                         color = "#228b22"
-                        badge = "ELITE"
+                        badge = "GREAT"
                     elif rating >= 0.7:
                         color = "#32cd32"
                         badge = "VERY GOOD"
@@ -1063,11 +1070,11 @@ with tab6:
                     if rating >= 0.9:
                         color = "#006400"
                         bg_color = "#d4edda"
-                        badge = "SUPERSTAR"
+                        badge = "ELITE"
                     elif rating >= 0.8:
                         color = "#228b22"
                         bg_color = "#d4edda"
-                        badge = "ELITE"
+                        badge = "GREAT"
                     elif rating >= 0.7:
                         color = "#32cd32"
                         bg_color = "#e8f5e8"
