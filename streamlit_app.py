@@ -74,13 +74,6 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
     
-    # Usage tip
-    st.markdown("""
-    <div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin: 20px 0;'>
-        <strong style='color: #856404;'>💡 Usage Tip:</strong> When you first interact with any feature (search, filters, etc.), the page will reset to this home tab. After that first interaction, you can navigate freely between tabs without any resets.
-    </div>
-    """, unsafe_allow_html=True)
-    
 
 with tab2:
     # Header with styling
