@@ -69,12 +69,31 @@ with tab1:
     <div style='background-color: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin: 20px 0;'>
         <h2 style='color: #1f77b4; border-bottom: 2px solid #e1e5e9; padding-bottom: 10px;'>📊 Overview</h2>
         <p style='font-size: 1.1rem; line-height: 1.6; color: #333;'>
-            This model predicts <strong>NBA success in the first four years</strong> of a player's career based on their college basketball statistics and performance. Important to note that if the player either did not play college basketball, or did not play 15 games of college basketball, they will not have a prediction. This model Utilized an ensemble of logistic regression models trained with different random seeds to improve model stability and accuracy
+            This model predicts <strong>NBA success in the first four years</strong> of a player's career based on their college basketball statistics and performance. Important to note that if the player either did not play college basketball, or did not play 15 games of college basketball, they will not have a prediction. This model utilized an ensemble of logistic regression models trained with different random seeds to improve model stability and accuracy.
+            
+            
  
         </p>
     </div>
     """, unsafe_allow_html=True)
-    
+
+    # Most Important Indicators by Position
+    st.markdown("""
+    <div style='background-color: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin: 20px 0;'>
+        <h2 style='color: #1f77b4; border-bottom: 2px solid #e1e5e9; padding-bottom: 10px;'>🎯 Most Important Indicator by Position Group</h2>
+        <div style='display: flex; flex-direction: column; gap: 15px; margin-top: 15px;'>
+            <div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;'>
+                <strong style='color: #856404;'>Guards:</strong> Close Volume
+            </div>
+            <div style='background-color: #d1ecf1; padding: 15px; border-radius: 8px; border-left: 4px solid #17a2b8;'>
+                <strong style='color: #0c5460;'>Wings / Combo guards:</strong> Usg/Ast
+            </div>
+            <div style='background-color: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;'>
+                <strong style='color: #155724;'>Bigs:</strong> Rebounding
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 with tab2:
     # Header with styling
