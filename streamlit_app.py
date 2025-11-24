@@ -69,7 +69,8 @@ with tab1:
     <div style='background-color: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin: 20px 0;'>
         <h2 style='color: #1f77b4; border-bottom: 2px solid #e1e5e9; padding-bottom: 10px;'>📊 Overview</h2>
         <p style='font-size: 1.1rem; line-height: 1.6; color: #333;'>
-            This model predicts <strong>NBA success in the first four years</strong> of a player's career based on their college basketball statistics and performance. Important to note that if the player either did not play college basketball, or did not play 15 games of college basketball, they will not have a prediction. 
+            This model predicts <strong>NBA success in the first four years</strong> of a player's career based on their college basketball statistics and performance. Important to note that if the player either did not play college basketball, or did not play 15 games of college basketball, they will not have a prediction. This model Utilized an ensemble of logistic regression models trained with different random seeds to improve model stability and accuracy
+ 
         </p>
     </div>
     """, unsafe_allow_html=True)
