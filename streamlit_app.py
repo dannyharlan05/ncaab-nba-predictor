@@ -797,7 +797,7 @@ with tab5:
     # Add model training info
     st.markdown("""
     <div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #1f77b4; margin-bottom: 20px;'>
-        <strong style='color: #1f77b4;'>Note:</strong> Only players from 2019-2025 are available for analysis. Players are ranked by their ratings.
+        <strong style='color: #1f77b4;'>Note:</strong> <span style='color: #000;'>Only players from 2019-2025 are available for analysis. Players are ranked by their ratings.</span>
     </div>
     """, unsafe_allow_html=True)
     
@@ -968,7 +968,7 @@ with tab6:
     # Add model training info
     st.markdown("""
     <div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #1f77b4; margin-bottom: 20px;'>
-        <strong style='color: #1f77b4;'>Note:</strong> Players are ranked by their rating values. Only players from 2019-2025 are available for ranking.
+        <strong style='color: #1f77b4;'>Note:</strong> <span style='color: #000;'>Players are ranked by their rating values. Only players from 2019-2025 are available for ranking.</span>
     </div>
     """, unsafe_allow_html=True)
     
