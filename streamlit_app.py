@@ -940,7 +940,7 @@ with tab5:
                     
                     st.markdown(f"""
                     <div style='background-color: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid {color};'>
-                        <strong>Pick #{player['Pick']}: {player['Name']}</strong> - {player['Team']}<br>
+                        <strong style='color: #000;'>Pick #{player['Pick']}: {player['Name']}</strong> <span style='color: #000;'>- {player['Team']}</span><br>
                         <span style='color: {color}; font-weight: bold;'>{rating:.3f} rating{hypothetical_text}</span> | <span style='background-color: {color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;'>{badge}</span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -1114,7 +1114,7 @@ with tab6:
                     <div style='background-color: {bg_color}; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid {color};'>
                         <div style='display: flex; justify-content: space-between; align-items: center;'>
                             <div>
-                                <strong style='font-size: 1.1rem;'>#{i}. {player['Name']}</strong> - {player['Team']}<br>
+                                <strong style='font-size: 1.1rem; color: #000;'>#{i}. {player['Name']}</strong> <span style='color: #000;'>- {player['Team']}</span><br>
                                 <span style='color: #666; font-size: 0.9rem;'>{player['Height']} | {pick_text}</span>
                             </div>
                             <div style='text-align: right;'>
