@@ -50,7 +50,7 @@ with tab1:
         st.markdown("""
         <div style='background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #2ca02c;'>
             <h3 style='color: #2ca02c; margin: 0;'>2010-2018</h3>
-            <p style='margin: 5px 0 0 0;'>Training Period</p>
+            <p style='margin: 5px 0 0 0; color: #000;'>Training Period</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -58,7 +58,7 @@ with tab1:
         st.markdown("""
         <div style='background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #d62728;'>
             <h3 style='color: #d62728; margin: 0;'>2019-2025</h3>
-            <p style='margin: 5px 0 0 0;'>Testing Period</p>
+            <p style='margin: 5px 0 0 0; color: #000;'>Testing Period</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -83,13 +83,13 @@ with tab1:
         <h2 style='color: #1f77b4; border-bottom: 2px solid #e1e5e9; padding-bottom: 10px;'>🎯 Most Important Indicator by Position Group</h2>
         <div style='display: flex; flex-direction: column; gap: 15px; margin-top: 15px;'>
             <div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;'>
-                <strong style='color: #856404;'>Guards:</strong> Close Volume
+                <strong style='color: #856404;'>Guards:</strong> <span style='color: #000;'>Close Volume</span>
             </div>
             <div style='background-color: #d1ecf1; padding: 15px; border-radius: 8px; border-left: 4px solid #17a2b8;'>
-                <strong style='color: #0c5460;'>Wings / Combo guards:</strong> Usg/Ast
+                <strong style='color: #0c5460;'>Wings / Combo guards:</strong> <span style='color: #000;'>Usg/Ast</span>
             </div>
             <div style='background-color: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;'>
-                <strong style='color: #155724;'>Bigs:</strong> Rebounding
+                <strong style='color: #155724;'>Bigs:</strong> <span style='color: #000;'>Rebounding</span>
             </div>
         </div>
     </div>
@@ -106,8 +106,8 @@ with tab2:
     # Add model training info with better styling
     st.markdown("""
     <div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #1f77b4; margin-bottom: 20px;'>
-        <strong style='color: #1f77b4;'>Model Training:</strong> This model was trained on data from 2010-2018<br>
-        <strong style='color: #1f77b4;'>Ratings:</strong> Rating calculated and available for players drafted from 2019-2025
+        <strong style='color: #1f77b4;'>Model Training:</strong> <span style='color: #000;'>This model was trained on data from 2010-2018</span><br>
+        <strong style='color: #1f77b4;'>Ratings:</strong> <span style='color: #000;'>Rating calculated and available for players drafted from 2019-2025</span>
     </div>
     """, unsafe_allow_html=True)
     
@@ -263,7 +263,7 @@ with tab3:
     # Add model training info
     st.markdown("""
     <div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #1f77b4; margin-bottom: 20px;'>
-        <strong style='color: #1f77b4;'>Note:</strong> Only players from 2019-2025 are available for search and comparison. Players are ranked by their prediction scores.
+        <strong style='color: #1f77b4;'>Note:</strong> <span style='color: #000;'>Only players from 2019-2025 are available for search and comparison. Players are ranked by their prediction scores.</span>
     </div>
     """, unsafe_allow_html=True)
     
@@ -554,7 +554,7 @@ with tab4:
     # Add explanation
     st.markdown("""
     <div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 20px;'>
-        <strong style='color: #856404;'>Rankings Explanation:</strong> The rankings below show only players from 2019-2025, ranked by their ratings.
+        <strong style='color: #856404;'>Rankings Explanation:</strong> <span style='color: #000;'>The rankings below show only players from 2019-2025, ranked by their ratings.</span>
     </div>
     """, unsafe_allow_html=True)
     
@@ -564,7 +564,7 @@ with tab4:
     # Add model training info
     st.markdown("""
     <div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #1f77b4; margin-bottom: 20px;'>
-        <strong style='color: #1f77b4;'>Model Training:</strong> This model was trained on data from 2010-2018
+        <strong style='color: #1f77b4;'>Model Training:</strong> <span style='color: #000;'>This model was trained on data from 2010-2018</span>
     </div>
     """, unsafe_allow_html=True)
     
