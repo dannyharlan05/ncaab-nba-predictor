@@ -32,7 +32,7 @@ if final_df_transform is None:
 st.success(f"✅ Loaded {len(final_df_transform)} players and {len(models_by_cluster)} models!")
 
 # Create tabs
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["About", "Player Search", "Player Comparison", "Rankings & Analysis", "Player Rankings"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["About", "Player Rankings", "Player Search", "Player Comparison", "Top 10 Highest Ratings"])
 
 with tab1:
     # Header with visual styling
@@ -95,7 +95,7 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-with tab2:
+with tab3:  # Player Search
     # Header with styling
     st.markdown("""
     <div style='text-align: center; padding: 15px; background: linear-gradient(90deg, #1f77b4, #2ca02c); border-radius: 10px; margin-bottom: 20px;'>
@@ -251,7 +251,7 @@ with tab2:
             # Multiple matches - show options
             st.write(f"Found {len(matches)} players matching '{player_name}'. Please be more specific or use the exact name.")
 
-with tab3:
+with tab4:  # Player Comparison
     # Header with styling
     st.markdown("""
     <div style='text-align: center; padding: 15px; background: linear-gradient(90deg, #ff7f0e, #d62728); border-radius: 10px; margin-bottom: 20px;'>
@@ -540,7 +540,7 @@ with tab3:
                         if disclaimer2:
                             st.markdown(f"<p style='text-align: center; color: #888; font-size: 0.9rem; font-style: italic;'>{disclaimer2}</p>", unsafe_allow_html=True)
 
-with tab4:
+with tab5:  # Top 10 Highest Ratings
     # Header with styling
     st.markdown("""
     <div style='text-align: center; padding: 15px; background: linear-gradient(90deg, #9932cc, #8a2be2); border-radius: 10px; margin-bottom: 20px;'>
@@ -649,7 +649,7 @@ with tab4:
     except Exception as e:
         st.error(f"Error calculating top ratings: {str(e)}")
 
-with tab5:
+with tab2:  # Player Rankings
     # Header with styling
     st.markdown("""
     <div style='text-align: center; padding: 15px; background: linear-gradient(90deg, #6610f2, #fd7e14); border-radius: 10px; margin-bottom: 20px;'>
