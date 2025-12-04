@@ -32,7 +32,7 @@ if final_df_transform is None:
 st.success(f"✅ Loaded {len(final_df_transform)} players and {len(models_by_cluster)} models!")
 
 # Create tabs
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["About", "Player Search", "Player Comparison", "Rankings & Analysis", "Draft Class Analysis", "Player Rankings"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["About", "Player Search", "Player Comparison", "Rankings & Analysis", "Player Rankings"])
 
 with tab1:
     # Header with visual styling
@@ -133,7 +133,6 @@ with tab2:
                 st.write("**Player Info:**")
                 st.write(f"**Name:** {player.get('Name', 'Unknown')}")
                 st.write(f"**Team:** {player.get('Team', 'Unknown')}")
-                st.write(f"**Draft Pick:** #{int(player.get('Pick', 0)) if player.get('Pick', 0) > 0 else 'Undrafted'}")
                 st.write(f"**Height:** {player.get('Height', 'Unknown')}")
             
             with col2:
@@ -314,10 +313,9 @@ with tab3:
             # Player 1 column
             with col1:
                 st.markdown(f"### {player1['Name']}")
-                
+
                 # Basic info
                 st.write(f"**Team:** {player1.get('Team', 'Unknown')}")
-                st.write(f"**Draft Pick:** #{int(player1.get('Pick', 0)) if player1.get('Pick', 0) > 0 else 'Undrafted'}")
                 st.write(f"**Height:** {player1.get('Height', 'Unknown')}")
                 
                 # Key stats
@@ -430,10 +428,9 @@ with tab3:
             # Player 2 column
             with col2:
                 st.markdown(f"### {player2['Name']}")
-                
+
                 # Basic info
                 st.write(f"**Team:** {player2.get('Team', 'Unknown')}")
-                st.write(f"**Draft Pick:** #{int(player2.get('Pick', 0)) if player2.get('Pick', 0) > 0 else 'Undrafted'}")
                 st.write(f"**Height:** {player2.get('Height', 'Unknown')}")
                 
                 # Key stats
@@ -547,279 +544,24 @@ with tab4:
     # Header with styling
     st.markdown("""
     <div style='text-align: center; padding: 15px; background: linear-gradient(90deg, #9932cc, #8a2be2); border-radius: 10px; margin-bottom: 20px;'>
-        <h1 style='color: white; margin: 0;'>Rankings & Analysis</h1>
+        <h1 style='color: white; margin: 0;'>Top 10 Highest Ratings All-Time</h1>
     </div>
     """, unsafe_allow_html=True)
-    
+
     # Add explanation
     st.markdown("""
     <div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 20px;'>
-        <strong style='color: #856404;'>Rankings Explanation:</strong> <span style='color: #000;'>The rankings below show only players from 2019-2025, ranked by their ratings.</span>
+        <strong style='color: #856404;'>Note:</strong> <span style='color: #000;'>These are the top 10 highest rated players from 2019-2025 based on the model.</span>
     </div>
     """, unsafe_allow_html=True)
-    
-    st.subheader("Lottery Picks Analysis (2019-2025)")
-    st.write("*Players drafted in picks 1-14, ranked by rating*")
-    
-    # Add model training info
-    st.markdown("""
-    <div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #1f77b4; margin-bottom: 20px;'>
-        <strong style='color: #1f77b4;'>Model Training:</strong> <span style='color: #000;'>This model was trained on data from 2010-2018</span>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    try:
-        # Get all predictions for years 2019-2025 using the same logic as show_top_predictions_by_year
-        combined_rows = []
-        
-        # Loop through years 2019-2025 for rankings display
-        for year in range(19, 26):  # 19, 20, 21, 22, 23, 24, 25
-            for cluster_id, model_data in models_by_cluster.items():
-                # Filter by year and cluster
-                year_cluster_players = final_df_transform[
-                    (final_df_transform['Year'] == year) & 
-                    (final_df_transform['PlayStyleCluster'] == cluster_id)
-                ].copy()
-                
-                if year_cluster_players.empty:
-                    continue
-                
-                # Calculate predictions for all players in this cluster/year
-                cluster_features = model_data["features"]
-                cluster_scaler = model_data["scaler"]
-                cluster_coefs = model_data["avg_coefs"]
-                
-                predictions = []
-                for idx, row in year_cluster_players.iterrows():
-                    row_features = row[cluster_features].fillna(0)
-                    row_scaled = cluster_scaler.transform(row_features.values.reshape(1, -1))
-                    row_logit = np.dot(row_scaled, cluster_coefs)
-                    row_prob = 1 / (1 + np.exp(-row_logit))
-                    
-                    predictions.append(row_prob[0])
-                
-                year_cluster_players['Prediction'] = predictions
-                year_cluster_players['Cluster'] = cluster_id
-                combined_rows.append(year_cluster_players[['Name', 'Year', 'Prediction', 'Cluster', 'Team', 'Pick']])
-        
-        if combined_rows:
-            all_preds = pd.concat(combined_rows)
-            
-            # Get lottery picks and their prediction scores
-            lottery_picks_with_scores = []
-            
-            for cluster_id in [0.0, 1.0, 2.0]:
-                # Get all 2019-2025 players in this position for display
-                display_players = all_preds[all_preds['Cluster'] == cluster_id].copy()
-                
-                # Get lottery picks for this position (from 2019-2025 players)
-                position_lottery = display_players[(display_players['Pick'] <= 14) & (display_players['Pick'].notna())].copy()
-                
-                # Get all 2010-2025 players in this position for rating calculation
-                comparison_players = final_df_transform[
-                    (final_df_transform['PlayStyleCluster'] == cluster_id) & 
-                    (final_df_transform['Year'] >= 10) & 
-                    (final_df_transform['Year'] <= 25)
-                ].copy()
-                
-                if len(comparison_players) > 0 and cluster_id in models_by_cluster:
-                    model_data = models_by_cluster[cluster_id]
-                    features = model_data["features"]
-                    scaler = model_data["scaler"]
-                    avg_coefs = model_data["avg_coefs"]
-                    
-                    # Calculate predictions for all 2019-2025 players for rating ranking
-                    comparison_predictions = []
-                    for idx, row in comparison_players.iterrows():
-                        row_features = row[features].fillna(0)
-                        row_scaled = scaler.transform(row_features.values.reshape(1, -1))
-                        row_logit = np.dot(row_scaled, avg_coefs)
-                        row_prob = 1 / (1 + np.exp(-row_logit))
-                        
-                        comparison_predictions.append(row_prob[0])
-                    
-                    comparison_players['Prediction'] = comparison_predictions
-                    comparison_players = comparison_players.sort_values('Prediction', ascending=False).reset_index(drop=True)
-                    
-                    # Add lottery picks with their ratings within position
-                    for idx, player in position_lottery.iterrows():
-                        # Find player's rank within their position
-                        player_rank_idx = comparison_players[comparison_players['Name'] == player['Name']].index
-                        if len(player_rank_idx) > 0:
-                            rank = player_rank_idx[0] + 1  # 1-based rank
-                            total = len(comparison_players)
-                            # Use prediction score as rating
-                            rating = player['Prediction']
-                        else:
-                            # Fallback calculation
-                            player_prediction = player['Prediction']
-                            lower_preds = len([p for p in comparison_predictions if p < player_prediction])
-                            total = len(comparison_predictions)
-                            rating = player['Prediction']
-                        
-                        player_data = player.copy()
-                        player_data['Rating'] = rating
-                        lottery_picks_with_scores.append(player_data)
-            
-            if lottery_picks_with_scores:
-                # Convert to DataFrame and sort by rating
-                lottery_df = pd.DataFrame(lottery_picks_with_scores)
-                lottery_df = lottery_df.sort_values('Rating', ascending=False)
-                
-                # Show all lottery picks ranked by rating
-                st.subheader("All Lottery Picks Ranked by Rating")
-                
-                for i, (_, player) in enumerate(lottery_df.iterrows(), 1):
-                    year_display = 2000 + player['Year']
-                    pick_num = int(player['Pick']) if not pd.isna(player['Pick']) else 'Unknown'
-                    rating = player['Rating']
-                    
-                    st.markdown(f"**{i}. {player['Name']}** - Pick #{pick_num}")
-                    st.write(f"   {player.get('Team', 'Unknown')}, {year_display}")
-                    st.write(f"   Rating: {rating:.3f}")
-                    st.write("")
-            else:
-                st.write("No lottery picks found with rating data")
-        
-        else:
-            st.write("No data available for this analysis")
-            
-    except Exception as e:
-        st.error(f"Error calculating top lottery picks: {str(e)}")
 
-    st.markdown("---")
-    
-    # Add steals section
-    st.subheader("Draft Steals Analysis (2019-2025)")
-    st.write("*High rating players drafted after the lottery (picks 15+)*")
-    
     try:
-        if combined_rows:
-            all_preds = pd.concat(combined_rows)
-            
-            # Get draft steals and their prediction scores
-            steals_with_scores = []
-            
-            for cluster_id in [0.0, 1.0, 2.0]:
-                # Get all 2019-2025 players in this position for display
-                display_players = all_preds[all_preds['Cluster'] == cluster_id].copy()
-                
-                # Get non-lottery picks for this position (Pick > 14) from 2019-2025 players
-                position_steals = display_players[(display_players['Pick'] > 14) & (display_players['Pick'].notna())].copy()
-                
-                # Get all 2010-2025 players in this position for rating calculation
-                comparison_players = final_df_transform[
-                    (final_df_transform['PlayStyleCluster'] == cluster_id) & 
-                    (final_df_transform['Year'] >= 10) & 
-                    (final_df_transform['Year'] <= 25)
-                ].copy()
-                
-                if len(comparison_players) > 0 and cluster_id in models_by_cluster:
-                    model_data = models_by_cluster[cluster_id]
-                    features = model_data["features"]
-                    scaler = model_data["scaler"]
-                    avg_coefs = model_data["avg_coefs"]
-                    
-                    # Calculate predictions for all 2019-2025 players for rating ranking
-                    comparison_predictions = []
-                    for idx, row in comparison_players.iterrows():
-                        row_features = row[features].fillna(0)
-                        row_scaled = scaler.transform(row_features.values.reshape(1, -1))
-                        row_logit = np.dot(row_scaled, avg_coefs)
-                        row_prob = 1 / (1 + np.exp(-row_logit))
-                        
-                        comparison_predictions.append(row_prob[0])
-                    
-                    comparison_players['Prediction'] = comparison_predictions
-                    comparison_players = comparison_players.sort_values('Prediction', ascending=False).reset_index(drop=True)
-                    
-                    # Add non-lottery picks with good ratings within position
-                    for idx, player in position_steals.iterrows():
-                        # Find player's rank within their position
-                        player_rank_idx = comparison_players[comparison_players['Name'] == player['Name']].index
-                        if len(player_rank_idx) > 0:
-                            rank = player_rank_idx[0] + 1  # 1-based rank
-                            total = len(comparison_players)
-                            # Use prediction score as rating
-                            rating = player['Prediction']
-                        else:
-                            # Fallback calculation
-                            player_prediction = player['Prediction']
-                            lower_preds = len([p for p in comparison_predictions if p < player_prediction])
-                            total = len(comparison_predictions)
-                            rating = player['Prediction']
-                        
-                        # Only include players with decent ratings (0.3+)
-                        if rating >= 0.3:
-                            player_data = player.copy()
-                            player_data['Rating'] = rating
-                            steals_with_scores.append(player_data)
-            
-            if steals_with_scores:
-                # Convert to DataFrame and sort by rating
-                steals_df = pd.DataFrame(steals_with_scores)
-                steals_df = steals_df.sort_values('Rating', ascending=False)
-                
-                # Display top 25 steals
-                st.subheader("Top 25 Draft Steals by Rating")
-                top_steals = steals_df.head(25)
-                
-                for i, (_, player) in enumerate(top_steals.iterrows(), 1):
-                    year_display = 2000 + player['Year']
-                    pick_num = int(player['Pick']) if not pd.isna(player['Pick']) else 'Unknown'
-                    rating = player['Rating']
-                    
-                    st.markdown(f"**{i}. {player['Name']}** - Pick #{pick_num}")
-                    st.write(f"   {player.get('Team', 'Unknown')}, {year_display}")
-                    st.write(f"   Rating: {rating:.3f}")
-                    st.write("")
-            else:
-                st.write("No draft steals found with good ratings")
-        
-        else:
-            st.write("No data available for this analysis")
-            
-    except Exception as e:
-        st.error(f"Error calculating draft steals: {str(e)}")
+        # Get all players from 2019-2025
+        all_players_with_ratings = []
 
-    st.markdown("---")
+        for year in range(19, 26):  # 2019-2025
+            year_players = final_df_transform[final_df_transform['Year'] == year].copy()
 
-with tab5:
-    # Header with styling
-    st.markdown("""
-    <div style='text-align: center; padding: 15px; background: linear-gradient(90deg, #6f42c1, #e83e8c); border-radius: 10px; margin-bottom: 20px;'>
-        <h1 style='color: white; margin: 0;'>Draft Class Analysis by Year</h1>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.write("*Enter a year to see all drafted players ordered by draft pick with their prediction scores*")
-    
-    # Add model training info
-    st.markdown("""
-    <div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #1f77b4; margin-bottom: 20px;'>
-        <strong style='color: #1f77b4;'>Note:</strong> <span style='color: #000;'>Only players from 2019-2025 are available for analysis. Players are ranked by their ratings.</span>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Year input
-    selected_year = st.number_input("Enter draft year (e.g., 2019, 2020, etc.):", 
-                                   min_value=2019, max_value=2025, value=2019, step=1)
-    
-    # Convert to internal year format (subtract 2000)
-    internal_year = selected_year - 2000
-    
-    try:
-        # Get all players from the selected year
-        year_players = final_df_transform[
-            (final_df_transform['Year'] == internal_year) & 
-            (final_df_transform['Pick'].notna()) & 
-            (final_df_transform['Pick'] > 0)
-        ].copy()
-        
-        if len(year_players) > 0 and 2019 <= selected_year <= 2025:
-            # Calculate predictions for all players
-            year_players_with_ratings = []
-            
             for idx, player in year_players.iterrows():
                 cluster = player["PlayStyleCluster"]
                 if cluster in models_by_cluster:
@@ -827,135 +569,88 @@ with tab5:
                     features = model_data["features"]
                     scaler = model_data["scaler"]
                     avg_coefs = model_data["avg_coefs"]
-                    
+
                     # Calculate prediction
                     player_features = player[features].fillna(0)
                     player_scaled = scaler.transform(player_features.values.reshape(1, -1))
                     logit = np.dot(player_scaled, avg_coefs)
                     prob = 1 / (1 + np.exp(-logit))
-                    
-                    
-                    # Get comparison players for rating calculation
-                    if 19 <= internal_year <= 25:
-                        # Use 2010-2025 for rating calculation
-                        comparison_players = final_df_transform[
-                            (final_df_transform['PlayStyleCluster'] == cluster) & 
-                            (final_df_transform['Year'] >= 10) & 
-                            (final_df_transform['Year'] <= 25)
-                        ]
-                    else:
-                        # For 2010-2018, compare against full 2010-2025 dataset
-                        comparison_players = final_df_transform[
-                            (final_df_transform['PlayStyleCluster'] == cluster) & 
-                            (final_df_transform['Year'] >= 10) & 
-                            (final_df_transform['Year'] <= 25)
-                        ]
-                    
-                    if len(comparison_players) > 0:
-                        # Calculate predictions for comparison players
-                        comparison_predictions = []
-                        for _, comp_player in comparison_players.iterrows():
-                            try:
-                                comp_features = comp_player[features].fillna(0)
-                                comp_scaled = scaler.transform(comp_features.values.reshape(1, -1))
-                                comp_logit = np.dot(comp_scaled, avg_coefs)
-                                comp_prob = 1 / (1 + np.exp(-comp_logit))
-                                
-                                comparison_predictions.append(comp_prob[0])
-                            except:
-                                comparison_predictions.append(0)
-                        
-                        # Calculate rating within position
-                        comparison_players = comparison_players.copy()
-                        comparison_players['Prediction'] = comparison_predictions
-                        comparison_players = comparison_players.sort_values('Prediction', ascending=False).reset_index(drop=True)
-                        
-                        if 19 <= internal_year <= 25:
-                            # Actual rating for 2019-2025 players within their position
-                            player_rank_idx = comparison_players[comparison_players['Name'] == player['Name']].index
-                            if len(player_rank_idx) > 0:
-                                rank = player_rank_idx[0] + 1  # 1-based rank
-                                total = len(comparison_players)
-                                # Use prediction score as rating
-                                rating = prob[0]
-                                is_hypothetical = False
-                            else:
-                                rating = 0
-                                is_hypothetical = False
-                        else:
-                            # Hypothetical rating for 2010-2018 players within position
-                            lower_preds = len([p for p in comparison_predictions if p < prob[0]])
-                            total = len(comparison_predictions)
-                            rating = prob[0]
-                            is_hypothetical = True
-                        
-                        # Add player data
-                        player_data = {
-                            'Name': player['Name'],
-                            'Pick': int(player['Pick']),
-                            'Team': player.get('Team', 'Unknown'),
-                            'Rating': rating,
-                            'Prediction': prob[0],
-                            'IsHypothetical': is_hypothetical
-                        }
-                        year_players_with_ratings.append(player_data)
-            
-            if year_players_with_ratings:
-                # Convert to DataFrame and sort by draft pick
-                year_df = pd.DataFrame(year_players_with_ratings)
-                year_df = year_df.sort_values('Pick')
-                
-                st.subheader(f"{selected_year} Draft Class ({len(year_df)} players)")
-                
-                # Show players
-                for i, (_, player) in enumerate(year_df.iterrows(), 1):
-                    rating = player['Rating']
-                    hypothetical_text = " (Hypothetical)" if player['IsHypothetical'] else ""
-                    
-                    # Color coding based on rating - 8 granular categories
-                    if rating >= 0.9:
-                        color = "#006400"
-                        badge = "ELITE"
-                    elif rating >= 0.8:
-                        color = "#228b22"
-                        badge = "GREAT"
-                    elif rating >= 0.7:
-                        color = "#32cd32"
-                        badge = "VERY GOOD"
-                    elif rating >= 0.6:
-                        color = "#9acd32"
-                        badge = "GOOD"
-                    elif rating >= 0.5:
-                        color = "#ff7f0e"
-                        badge = "ABOVE AVERAGE"
-                    elif rating >= 0.4:
-                        color = "#ffa500"
-                        badge = "AVERAGE"
-                    elif rating >= 0.3:
-                        color = "#ff6347"
-                        badge = "BELOW AVERAGE"
-                    else:
-                        color = "#d62728"
-                        badge = "POOR"
-                    
-                    st.markdown(f"""
-                    <div style='background-color: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid {color};'>
-                        <strong style='color: #000;'>Pick #{player['Pick']}: {player['Name']}</strong> <span style='color: #000;'>- {player['Team']}</span><br>
-                        <span style='color: {color}; font-weight: bold;'>{rating:.3f} rating{hypothetical_text}</span> | <span style='background-color: {color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;'>{badge}</span>
-                    </div>
-                    """, unsafe_allow_html=True)
-            else:
-                st.write("No players found with rating data for this year")
-        else:
-            if selected_year < 2019:
-                st.warning(f"Data for {selected_year} is not available. Only years 2019-2025 are supported.")
-            else:
-                st.write(f"No drafted players found for {selected_year}")
-            
-    except Exception as e:
-        st.error(f"Error analyzing {selected_year} draft class: {str(e)}")
 
-with tab6:
+                    player_data = {
+                        'Name': player['Name'],
+                        'Team': player.get('Team', 'Unknown'),
+                        'Year': 2000 + player['Year'],
+                        'Rating': prob[0],
+                        'Height': player.get('Height', 'Unknown'),
+                        'BPM': player.get('BPM', 0)
+                    }
+                    all_players_with_ratings.append(player_data)
+
+        if all_players_with_ratings:
+            # Convert to DataFrame and get top 10
+            all_players_df = pd.DataFrame(all_players_with_ratings)
+            top_10 = all_players_df.sort_values('Rating', ascending=False).head(10)
+
+            # Display top 10
+            for i, (_, player) in enumerate(top_10.iterrows(), 1):
+                rating = player['Rating']
+
+                # Color coding based on rating
+                if rating >= 0.9:
+                    color = "#006400"
+                    bg_color = "#d4edda"
+                    badge = "ELITE"
+                elif rating >= 0.8:
+                    color = "#228b22"
+                    bg_color = "#d4edda"
+                    badge = "GREAT"
+                elif rating >= 0.7:
+                    color = "#32cd32"
+                    bg_color = "#e8f5e8"
+                    badge = "VERY GOOD"
+                elif rating >= 0.6:
+                    color = "#9acd32"
+                    bg_color = "#f0f8e8"
+                    badge = "GOOD"
+                elif rating >= 0.5:
+                    color = "#ff7f0e"
+                    bg_color = "#fff3cd"
+                    badge = "ABOVE AVERAGE"
+                elif rating >= 0.4:
+                    color = "#ffa500"
+                    bg_color = "#fff8dc"
+                    badge = "AVERAGE"
+                elif rating >= 0.3:
+                    color = "#ff6347"
+                    bg_color = "#ffe4e1"
+                    badge = "BELOW AVERAGE"
+                else:
+                    color = "#d62728"
+                    bg_color = "#f8d7da"
+                    badge = "POOR"
+
+                st.markdown(f"""
+                <div style='background-color: {bg_color}; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid {color};'>
+                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                        <div>
+                            <h3 style='color: #000; margin: 0;'>#{i}. {player['Name']}</h3>
+                            <p style='color: #666; margin: 5px 0 0 0;'>{player['Team']} | {player['Year']} | {player['Height']}</p>
+                            <p style='color: #666; margin: 5px 0 0 0;'>BPM: {player['BPM']:.1f}</p>
+                        </div>
+                        <div style='text-align: right;'>
+                            <div style='color: {color}; font-size: 2rem; font-weight: bold;'>{rating:.3f}</div>
+                            <span style='background-color: {color}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 0.85rem; font-weight: bold;'>{badge}</span>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.write("No data available")
+
+    except Exception as e:
+        st.error(f"Error calculating top ratings: {str(e)}")
+
+with tab5:
     # Header with styling
     st.markdown("""
     <div style='text-align: center; padding: 15px; background: linear-gradient(90deg, #6610f2, #fd7e14); border-radius: 10px; margin-bottom: 20px;'>
@@ -1074,8 +769,7 @@ with tab6:
                 # Display players in a nice format
                 for i, (_, player) in enumerate(top_players.iterrows(), 1):
                     rating = player['Rating']
-                    pick_text = f"Pick #{int(player['Pick'])}" if pd.notna(player['Pick']) and player['Pick'] > 0 else "Undrafted"
-                    
+
                     # Color coding based on rating - 8 granular categories
                     if rating >= 0.9:
                         color = "#006400"
@@ -1115,7 +809,7 @@ with tab6:
                         <div style='display: flex; justify-content: space-between; align-items: center;'>
                             <div>
                                 <strong style='font-size: 1.1rem; color: #000;'>#{i}. {player['Name']}</strong> <span style='color: #000;'>- {player['Team']}</span><br>
-                                <span style='color: #666; font-size: 0.9rem;'>{player['Height']} | {pick_text}</span>
+                                <span style='color: #666; font-size: 0.9rem;'>{player['Height']}</span>
                             </div>
                             <div style='text-align: right;'>
                                 <div style='color: {color}; font-size: 1.5rem; font-weight: bold;'>{rating:.3f}</div>
