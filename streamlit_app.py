@@ -634,8 +634,7 @@ with tab4:
                     <div style='display: flex; justify-content: space-between; align-items: center;'>
                         <div>
                             <h3 style='color: #000; margin: 0;'>#{i}. {player['Name']}</h3>
-                            <p style='color: #666; margin: 5px 0 0 0;'>{player['Team']} | {player['Year']} | {player['Height']}</p>
-                            <p style='color: #666; margin: 5px 0 0 0;'>BPM: {player['BPM']:.1f}</p>
+                            <p style='color: #666; margin: 5px 0 0 0;'>{player['Team']} | {player['Year']} | {player['Height']} | BPM: {player['BPM']:.1f}</p>
                         </div>
                         <div style='text-align: right;'>
                             <div style='color: {color}; font-size: 2rem; font-weight: bold;'>{rating:.3f}</div>
