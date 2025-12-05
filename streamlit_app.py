@@ -6,6 +6,17 @@ import pickle
 # Page config
 st.set_page_config(page_title="NCAAB NBA Success Predictor", page_icon="🏀")
 
+def apply_class_adjustment(cluster, prob, player_encoded):
+    """Apply class year adjustment for wings (cluster 1.0)"""
+    if cluster == 1.0:
+        if player_encoded == 4:  # Senior
+            return max(0, prob - 0.1)
+        elif player_encoded == 3:  # Junior
+            return max(0, prob - 0.05)
+        elif player_encoded == 2:  # Sophomore
+            return max(0, prob - 0.025)
+    return prob
+
 # Title
 st.title("🏀 NCAAB NBA Success Predictor")
 st.write("Predict NBA success probability (VORP > 4 in first 4 seasons) using college basketball stats")
@@ -155,9 +166,10 @@ with tab3:  # Player Search
                 player_scaled = scaler.transform(player_features.values.reshape(1, -1))
                 logit = np.dot(player_scaled, avg_coefs)
                 prob = 1 / (1 + np.exp(-logit))
-                
-                
-                
+
+                # Apply class year adjustment
+                prob[0] = apply_class_adjustment(cluster, prob[0], player.get('Player_Encoded', 0))
+
                 # Display prediction
                 st.markdown("---")
                 st.subheader("Prediction Results")
@@ -183,8 +195,10 @@ with tab3:  # Player Search
                             row_scaled = scaler.transform(row_features.values.reshape(1, -1))
                             row_logit = np.dot(row_scaled, avg_coefs)
                             row_prob = 1 / (1 + np.exp(-row_logit))
-                            
-                            predictions.append(row_prob[0])
+
+                            # Apply class year adjustment
+                            adjusted_prob = apply_class_adjustment(cluster, row_prob[0], row.get('Player_Encoded', 0))
+                            predictions.append(adjusted_prob)
                         except:
                             predictions.append(0)
                     
@@ -347,8 +361,10 @@ with tab4:  # Player Comparison
                         player1_scaled = scaler.transform(player1_features.values.reshape(1, -1))
                         logit1 = np.dot(player1_scaled, avg_coefs)
                         prob1 = 1 / (1 + np.exp(-logit1))
-                        
-                        
+
+                        # Apply class year adjustment
+                        prob1[0] = apply_class_adjustment(cluster1, prob1[0], player1.get('Player_Encoded', 0))
+
                         # Calculate all cluster predictions for ranking
                         predictions = []
                         for idx, row in cluster_players.iterrows():
@@ -357,8 +373,10 @@ with tab4:  # Player Comparison
                                 row_scaled = scaler.transform(row_features.values.reshape(1, -1))
                                 row_logit = np.dot(row_scaled, avg_coefs)
                                 row_prob = 1 / (1 + np.exp(-row_logit))
-                                
-                                predictions.append(row_prob[0])
+
+                                # Apply class year adjustment
+                                adjusted_prob = apply_class_adjustment(cluster1, row_prob[0], row.get('Player_Encoded', 0))
+                                predictions.append(adjusted_prob)
                             except:
                                 predictions.append(0)
                         
@@ -462,8 +480,11 @@ with tab4:  # Player Comparison
                         player2_scaled = scaler.transform(player2_features.values.reshape(1, -1))
                         logit2 = np.dot(player2_scaled, avg_coefs)
                         prob2 = 1 / (1 + np.exp(-logit2))
-                        
-                        
+
+                        # Apply class year adjustment
+                        prob2[0] = apply_class_adjustment(cluster2, prob2[0], player2.get('Player_Encoded', 0))
+
+
                         # Calculate all cluster predictions for ranking
                         predictions = []
                         for idx, row in cluster_players.iterrows():
@@ -472,8 +493,10 @@ with tab4:  # Player Comparison
                                 row_scaled = scaler.transform(row_features.values.reshape(1, -1))
                                 row_logit = np.dot(row_scaled, avg_coefs)
                                 row_prob = 1 / (1 + np.exp(-row_logit))
-                                
-                                predictions.append(row_prob[0])
+
+                                # Apply class year adjustment
+                                adjusted_prob = apply_class_adjustment(cluster2, row_prob[0], row.get('Player_Encoded', 0))
+                                predictions.append(adjusted_prob)
                             except:
                                 predictions.append(0)
                         
@@ -575,6 +598,9 @@ with tab5:  # Top 10 Highest Ratings
                     player_scaled = scaler.transform(player_features.values.reshape(1, -1))
                     logit = np.dot(player_scaled, avg_coefs)
                     prob = 1 / (1 + np.exp(-logit))
+
+                    # Apply class year adjustment
+                    prob[0] = apply_class_adjustment(cluster, prob[0], player.get('Player_Encoded', 0))
 
                     player_data = {
                         'Name': player['Name'],
@@ -703,7 +729,10 @@ with tab2:  # Player Rankings
                     player_scaled = scaler.transform(player_features.values.reshape(1, -1))
                     logit = np.dot(player_scaled, avg_coefs)
                     prob = 1 / (1 + np.exp(-logit))
-                    
+
+                    # Apply class year adjustment
+                    prob[0] = apply_class_adjustment(cluster, prob[0], player.get('Player_Encoded', 0))
+
                     # Get all players in same position for rating calculation (2010-2025)
                     comparison_players = final_df_transform[
                         (final_df_transform['PlayStyleCluster'] == cluster) & 
@@ -720,7 +749,10 @@ with tab2:  # Player Rankings
                                 comp_scaled = scaler.transform(comp_features.values.reshape(1, -1))
                                 comp_logit = np.dot(comp_scaled, avg_coefs)
                                 comp_prob = 1 / (1 + np.exp(-comp_logit))
-                                comparison_predictions.append(comp_prob[0])
+
+                                # Apply class year adjustment
+                                adjusted_prob = apply_class_adjustment(cluster, comp_prob[0], comp_player.get('Player_Encoded', 0))
+                                comparison_predictions.append(adjusted_prob)
                             except:
                                 comparison_predictions.append(0)
                         
