@@ -15,8 +15,23 @@ def apply_class_adjustment(cluster, prob, player_encoded):
             return max(0, prob - 0.05)
         elif player_encoded == 2:  # Sophomore
             return max(0, prob - 0.025)
-    return prob
 
+    if cluster == 0.0:
+        if player_encoded == 4:  # Senior
+            return max(0, prob - 0.1)
+        elif player_encoded == 3:  # Junior
+            return max(0, prob - 0.05)
+        elif player_encoded == 2:  # Sophomore
+            return max(0, prob - 0.025)
+
+    if cluster == 2.0:
+        if player_encoded == 4:  # Senior
+            return max(0, prob - 0.1)
+        elif player_encoded == 3:  # Junior
+            return max(0, prob - 0.05)
+        elif player_encoded == 2:  # Sophomore
+            return max(0, prob - 0.025)
+    return prob
 # Title
 st.title("🏀 NCAAB NBA Success Predictor")
 st.write("Predict NBA success probability (VORP > 4 in first 4 seasons) using college basketball stats")
