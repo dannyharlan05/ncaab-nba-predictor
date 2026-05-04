@@ -83,7 +83,7 @@ with tab1:
     with col2:
         st.markdown("""
         <div style='background-color: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center; border-left: 4px solid #d62728;'>
-            <h3 style='color: #d62728; margin: 0;'>2019-2025</h3>
+            <h3 style='color: #d62728; margin: 0;'>2019-2026</h3>
             <p style='margin: 5px 0 0 0; color: #000;'>Testing Period</p>
         </div>
         """, unsafe_allow_html=True)
@@ -141,15 +141,15 @@ with tab3:  # Player Search
     player_name = st.text_input("Enter player name:", placeholder="e.g., Shai Gilgeous-Alexander")
     
     if player_name:
-        # Find matching players (only 2019-2025)
+        # Find matching players (only 2019-2026)
         matches = final_df_transform[
             (final_df_transform["Name"].str.contains(player_name, case=False, na=False)) &
             (final_df_transform['Year'] >= 19) & 
-            (final_df_transform['Year'] <= 25)
+            (final_df_transform['Year'] <= 26)
         ]
         
         if len(matches) == 0:
-            st.warning(f"No players found matching '{player_name}' in the 2019-2025 dataset")
+            st.warning(f"No players found matching '{player_name}' in the 2019-2026 dataset")
         elif len(matches) == 1:
             # Exact match - make prediction
             player = matches.iloc[0]
@@ -191,14 +191,14 @@ with tab3:  # Player Search
                 
                 # Additional info
                 
-                # Calculate rating within position using 2010-2025 data for ratings
+                # Calculate rating within position using 2010-2026 data for ratings
                 player_year = player.get('Year', 0)
                 
-                # Get ALL 2010-2025 players in same position for rating calculation
+                # Get ALL 2010-2026 players in same position for rating calculation
                 cluster_players = final_df_transform[
                     (final_df_transform['PlayStyleCluster'] == cluster) & 
                     (final_df_transform['Year'] >= 10) & 
-                    (final_df_transform['Year'] <= 25)
+                    (final_df_transform['Year'] <= 26)
                 ]
                 
                 if len(cluster_players) > 0:
@@ -291,7 +291,7 @@ with tab4:  # Player Comparison
     # Add model training info
     st.markdown("""
     <div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #1f77b4; margin-bottom: 20px;'>
-        <strong style='color: #1f77b4;'>Note:</strong> <span style='color: #000;'>Only players from 2019-2025 are available for search and comparison. Players are ranked by their prediction scores.</span>
+        <strong style='color: #1f77b4;'>Note:</strong> <span style='color: #000;'>Only players from 2019-2026 are available for search and comparison. Players are ranked by their prediction scores.</span>
     </div>
     """, unsafe_allow_html=True)
     
@@ -308,22 +308,22 @@ with tab4:  # Player Comparison
     
     # Only show comparison when both players are entered
     if player1_name and player2_name:
-        # Find both players (only 2019-2025)
+        # Find both players (only 2019-2026)
         matches1 = final_df_transform[
             (final_df_transform["Name"].str.contains(player1_name, case=False, na=False)) &
             (final_df_transform['Year'] >= 19) & 
-            (final_df_transform['Year'] <= 25)
+            (final_df_transform['Year'] <= 26)
         ]
         matches2 = final_df_transform[
             (final_df_transform["Name"].str.contains(player2_name, case=False, na=False)) &
             (final_df_transform['Year'] >= 19) & 
-            (final_df_transform['Year'] <= 25)
+            (final_df_transform['Year'] <= 26)
         ]
         
         if len(matches1) == 0:
-            st.warning(f"No players found matching '{player1_name}' in the 2019-2025 dataset")
+            st.warning(f"No players found matching '{player1_name}' in the 2019-2026 dataset")
         elif len(matches2) == 0:
-            st.warning(f"No players found matching '{player2_name}' in the 2019-2025 dataset")
+            st.warning(f"No players found matching '{player2_name}' in the 2019-2026 dataset")
         elif len(matches1) > 1:
             st.warning(f"Multiple players found matching '{player1_name}'. Please be more specific.")
         elif len(matches2) > 1:
@@ -357,11 +357,11 @@ with tab4:  # Player Comparison
                 # Calculate prediction score
                 cluster1 = player1["PlayStyleCluster"]
                 if cluster1 in models_by_cluster:
-                    # Get 2019-2025 players in same cluster for comparison
+                    # Get 2019-2026 players in same cluster for comparison
                     cluster_players = final_df_transform[
                         (final_df_transform['PlayStyleCluster'] == cluster1) & 
                         (final_df_transform['Year'] >= 10) & 
-                        (final_df_transform['Year'] <= 25)
+                        (final_df_transform['Year'] <= 26)
                     ]
                     
                     if len(cluster_players) > 0:
@@ -399,10 +399,10 @@ with tab4:  # Player Comparison
                         cluster_players['Prediction'] = predictions
                         cluster_players = cluster_players.sort_values('Prediction', ascending=False).reset_index(drop=True)
                         
-                        # Check if player1 is in 2019-2025
+                        # Check if player1 is in 2019-2026
                         player1_year = player1.get('Year', 0)
-                        if 19 <= player1_year <= 24:
-                            # Player is in 2019-2025, show actual rank
+                        if 19 <= player1_year <= 25:
+                            # Player is in 2019-2026, show actual rank
                             player1_rank_idx = cluster_players[cluster_players['Name'] == player1['Name']].index
                             if len(player1_rank_idx) > 0:
                                 rank1 = player1_rank_idx[0] + 1
@@ -476,11 +476,11 @@ with tab4:  # Player Comparison
                 # Calculate prediction score
                 cluster2 = player2["PlayStyleCluster"]
                 if cluster2 in models_by_cluster:
-                    # Get 2019-2025 players in same cluster for comparison
+                    # Get 2019-2026 players in same cluster for comparison
                     cluster_players = final_df_transform[
                         (final_df_transform['PlayStyleCluster'] == cluster2) & 
                         (final_df_transform['Year'] >= 10) & 
-                        (final_df_transform['Year'] <= 25)
+                        (final_df_transform['Year'] <= 26)
                     ]
                     
                     if len(cluster_players) > 0:
@@ -519,10 +519,10 @@ with tab4:  # Player Comparison
                         cluster_players['Prediction'] = predictions
                         cluster_players = cluster_players.sort_values('Prediction', ascending=False).reset_index(drop=True)
                         
-                        # Check if player2 is in 2019-2025
+                        # Check if player2 is in 2019-2026
                         player2_year = player2.get('Year', 0)
-                        if 19 <= player2_year <= 24:
-                            # Player is in 2019-2025, show actual rank
+                        if 19 <= player2_year <= 25:
+                            # Player is in 2019-2026, show actual rank
                             player2_rank_idx = cluster_players[cluster_players['Name'] == player2['Name']].index
                             if len(player2_rank_idx) > 0:
                                 rank2 = player2_rank_idx[0] + 1
@@ -589,15 +589,15 @@ with tab5:  # Top 10 Highest Ratings
     # Add explanation
     st.markdown("""
     <div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 20px;'>
-        <strong style='color: #856404;'>Note:</strong> <span style='color: #000;'>These are the top 10 highest rated players from 2019-2025 based on the model.</span>
+        <strong style='color: #856404;'>Note:</strong> <span style='color: #000;'>These are the top 10 highest rated players from 2019-2026 based on the model.</span>
     </div>
     """, unsafe_allow_html=True)
 
     try:
-        # Get all players from 2019-2025
+        # Get all players from 2019-2026
         all_players_with_ratings = []
 
-        for year in range(19, 26):  # 2019-2025
+        for year in range(19, 27):  # 2019-2026
             year_players = final_df_transform[final_df_transform['Year'] == year].copy()
 
             for idx, player in year_players.iterrows():
@@ -703,7 +703,7 @@ with tab2:  # Player Rankings
     # Add model training info
     st.markdown("""
     <div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #1f77b4; margin-bottom: 20px;'>
-        <strong style='color: #1f77b4;'>Note:</strong> <span style='color: #000;'>Players are ranked by their rating values. Only players from 2019-2025 are available for ranking.</span>
+        <strong style='color: #1f77b4;'>Note:</strong> <span style='color: #000;'>Players are ranked by their rating values. Only players from 2019-2026 are available for ranking.</span>
     </div>
     """, unsafe_allow_html=True)
     
@@ -748,11 +748,11 @@ with tab2:  # Player Rankings
                     # Apply class year adjustment
                     prob[0] = apply_class_adjustment(cluster, prob[0], player.get('Player_Encoded', 0))
 
-                    # Get all players in same position for rating calculation (2010-2025)
+                    # Get all players in same position for rating calculation (2010-2026)
                     comparison_players = final_df_transform[
                         (final_df_transform['PlayStyleCluster'] == cluster) & 
                         (final_df_transform['Year'] >= 10) & 
-                        (final_df_transform['Year'] <= 25)
+                        (final_df_transform['Year'] <= 26)
                     ]
                     
                     if len(comparison_players) > 0:
