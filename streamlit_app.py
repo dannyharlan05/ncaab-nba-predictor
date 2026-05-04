@@ -709,7 +709,7 @@ with tab2:  # Player Rankings
     
     # Year selection
     ranking_year = st.selectbox("Select Year for Rankings:", 
-                               options=list(range(2019, 2026)), 
+                               options=list(range(2019, 2027)),
                                index=0, 
                                key="ranking_year")
     
