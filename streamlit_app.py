@@ -730,7 +730,7 @@ with tab2:  # Player Rankings
         if len(year_players) > 0:
             # Calculate ratings for each player
             all_players_with_ratings = []
-            
+
             for idx, player in year_players.iterrows():
                 cluster = player["PlayStyleCluster"]
                 if cluster in models_by_cluster:
@@ -738,7 +738,7 @@ with tab2:  # Player Rankings
                     features = model_data["features"]
                     scaler = model_data["scaler"]
                     avg_coefs = model_data["avg_coefs"]
-                    
+
                     # Calculate prediction for this player
                     player_features = player[features].fillna(0)
                     player_scaled = scaler.transform(player_features.values.reshape(1, -1))
@@ -748,59 +748,19 @@ with tab2:  # Player Rankings
                     # Apply class year adjustment
                     prob[0] = apply_class_adjustment(cluster, prob[0], player.get('Player_Encoded', 0))
 
-                    # Get all players in same position for rating calculation (2010-2026)
-                    comparison_players = final_df_transform[
-                        (final_df_transform['PlayStyleCluster'] == cluster) & 
-                        (final_df_transform['Year'] >= 10) & 
-                        (final_df_transform['Year'] <= 26)
-                    ]
-                    
-                    if len(comparison_players) > 0:
-                        # Calculate predictions for all comparison players
-                        comparison_predictions = []
-                        for _, comp_player in comparison_players.iterrows():
-                            try:
-                                comp_features = comp_player[features].fillna(0)
-                                comp_scaled = scaler.transform(comp_features.values.reshape(1, -1))
-                                comp_logit = np.dot(comp_scaled, avg_coefs)
-                                comp_prob = 1 / (1 + np.exp(-comp_logit))
-
-                                # Apply class year adjustment
-                                adjusted_prob = apply_class_adjustment(cluster, comp_prob[0], comp_player.get('Player_Encoded', 0))
-                                comparison_predictions.append(adjusted_prob)
-                            except:
-                                comparison_predictions.append(0)
-                        
-                        # Calculate rating within position
-                        comparison_players = comparison_players.copy()
-                        comparison_players['Prediction'] = comparison_predictions
-                        comparison_players = comparison_players.sort_values('Prediction', ascending=False).reset_index(drop=True)
-                        
-                        # Find player's rank within their position
-                        player_rank_idx = comparison_players[comparison_players['Name'] == player['Name']].index
-                        if len(player_rank_idx) > 0:
-                            rank = player_rank_idx[0] + 1  # 1-based rank
-                            total = len(comparison_players)
-                            rating = prob[0]
-                        else:
-                            # Fallback calculation if player not found
-                            lower_preds = len([p for p in comparison_predictions if p < prob[0]])
-                            total = len(comparison_predictions)
-                            rating = prob[0]
-                        
-                        player_data = {
-                            'Name': player['Name'],
-                            'Team': player.get('Team', 'Unknown'),
-                            'Rating': rating,
-                            'Prediction': prob[0],
-                            'Pick': player.get('Pick', None),
-                            'Height': player.get('Height', 'Unknown'),
-                            'BPM': player.get('BPM', 0),
-                            'Ast': player.get('Ast', 0),
-                            'REB': player.get('REB', 0),
-                            'Blk': player.get('Blk', 0)
-                        }
-                        all_players_with_ratings.append(player_data)
+                    player_data = {
+                        'Name': player['Name'],
+                        'Team': player.get('Team', 'Unknown'),
+                        'Rating': prob[0],
+                        'Prediction': prob[0],
+                        'Pick': player.get('Pick', None),
+                        'Height': player.get('Height', 'Unknown'),
+                        'BPM': player.get('BPM', 0),
+                        'Ast': player.get('Ast', 0),
+                        'REB': player.get('REB', 0),
+                        'Blk': player.get('Blk', 0)
+                    }
+                    all_players_with_ratings.append(player_data)
             
             if all_players_with_ratings:
                 # Convert to DataFrame and sort by rating
