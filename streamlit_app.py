@@ -58,7 +58,7 @@ if final_df_transform is None:
 st.success(f"✅ Loaded {len(final_df_transform)} players and {len(models_by_cluster)} models!")
 
 # Create tabs
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["About", "Player Rankings", "Player Search", "Player Comparison", "Top 10 Highest Ratings"])
+tab1, tab2, tab3, tab4 = st.tabs(["About", "Player Rankings", "Player Search", "Player Comparison"])
 
 with tab1:
     # Header with visual styling
@@ -103,23 +103,85 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-    # Most Important Indicators by Position
+    # Top 10 Highest Ratings All-Time
     st.markdown("""
-    <div style='background-color: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin: 20px 0;'>
-        <h2 style='color: #1f77b4; border-bottom: 2px solid #e1e5e9; padding-bottom: 10px;'>🎯 Most Important Indicator by Position Group</h2>
-        <div style='display: flex; flex-direction: column; gap: 15px; margin-top: 15px;'>
-            <div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;'>
-                <strong style='color: #856404;'>Guards:</strong> <span style='color: #000;'>Close Volume</span>
-            </div>
-            <div style='background-color: #d1ecf1; padding: 15px; border-radius: 8px; border-left: 4px solid #17a2b8;'>
-                <strong style='color: #0c5460;'>Wings / Combo guards:</strong> <span style='color: #000;'>Usg/Ast</span>
-            </div>
-            <div style='background-color: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;'>
-                <strong style='color: #155724;'>Bigs:</strong> <span style='color: #000;'>Rebounding</span>
-            </div>
-        </div>
+    <div style='text-align: center; padding: 15px; background: linear-gradient(90deg, #9932cc, #8a2be2); border-radius: 10px; margin-bottom: 20px;'>
+        <h1 style='color: white; margin: 0;'>Top 10 Highest Ratings All-Time</h1>
     </div>
     """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 20px;'>
+        <strong style='color: #856404;'>Note:</strong> <span style='color: #000;'>These are the top 10 highest rated players from 2019-2026 based on the model.</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    try:
+        all_players_with_ratings = []
+        for year in range(19, 27):
+            year_players = final_df_transform[final_df_transform['Year'] == year].copy()
+            for idx, player in year_players.iterrows():
+                cluster = player["PlayStyleCluster"]
+                if cluster in models_by_cluster:
+                    model_data = models_by_cluster[cluster]
+                    features = model_data["features"]
+                    scaler = model_data["scaler"]
+                    avg_coefs = model_data["avg_coefs"]
+                    player_features = player[features].fillna(0)
+                    player_scaled = scaler.transform(player_features.values.reshape(1, -1))
+                    logit = np.dot(player_scaled, avg_coefs)
+                    prob = 1 / (1 + np.exp(-logit))
+                    prob[0] = apply_class_adjustment(cluster, prob[0], player.get('Player_Encoded', 0))
+                    all_players_with_ratings.append({
+                        'Name': player['Name'],
+                        'Team': player.get('Team', 'Unknown'),
+                        'Year': 2000 + player['Year'],
+                        'Rating': prob[0],
+                        'Height': player.get('Height', 'Unknown'),
+                        'BPM': player.get('BPM', 0)
+                    })
+
+        if all_players_with_ratings:
+            all_players_df = pd.DataFrame(all_players_with_ratings)
+            top_10 = all_players_df.sort_values('Rating', ascending=False).head(10)
+
+            for i, (_, player) in enumerate(top_10.iterrows(), 1):
+                rating = player['Rating']
+                if rating >= 0.9:
+                    color, bg_color, badge = "#006400", "#d4edda", "ELITE"
+                elif rating >= 0.8:
+                    color, bg_color, badge = "#228b22", "#d4edda", "GREAT"
+                elif rating >= 0.7:
+                    color, bg_color, badge = "#32cd32", "#e8f5e8", "VERY GOOD"
+                elif rating >= 0.6:
+                    color, bg_color, badge = "#9acd32", "#f0f8e8", "GOOD"
+                elif rating >= 0.5:
+                    color, bg_color, badge = "#ff7f0e", "#fff3cd", "ABOVE AVERAGE"
+                elif rating >= 0.4:
+                    color, bg_color, badge = "#ffa500", "#fff8dc", "AVERAGE"
+                elif rating >= 0.3:
+                    color, bg_color, badge = "#ff6347", "#ffe4e1", "BELOW AVERAGE"
+                else:
+                    color, bg_color, badge = "#d62728", "#f8d7da", "POOR"
+
+                st.markdown(f"""
+                <div style='background-color: {bg_color}; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid {color};'>
+                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                        <div>
+                            <h3 style='color: #000; margin: 0;'>#{i}. {player['Name']}</h3>
+                            <p style='color: #666; margin: 5px 0 0 0;'>{player['Team']} | {player['Year']} | {player['Height']} | BPM: {player['BPM']:.1f}</p>
+                        </div>
+                        <div style='text-align: right;'>
+                            <div style='color: {color}; font-size: 2rem; font-weight: bold;'>{rating:.3f}</div>
+                            <span style='background-color: {color}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 0.85rem; font-weight: bold;'>{badge}</span>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.write("No data available")
+    except Exception as e:
+        st.error(f"Error calculating top ratings: {str(e)}")
 
 with tab3:  # Player Search
     # Header with styling
@@ -577,118 +639,6 @@ with tab4:  # Player Comparison
                         
                         if disclaimer2:
                             st.markdown(f"<p style='text-align: center; color: #888; font-size: 0.9rem; font-style: italic;'>{disclaimer2}</p>", unsafe_allow_html=True)
-
-with tab5:  # Top 10 Highest Ratings
-    # Header with styling
-    st.markdown("""
-    <div style='text-align: center; padding: 15px; background: linear-gradient(90deg, #9932cc, #8a2be2); border-radius: 10px; margin-bottom: 20px;'>
-        <h1 style='color: white; margin: 0;'>Top 10 Highest Ratings All-Time</h1>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Add explanation
-    st.markdown("""
-    <div style='background-color: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 20px;'>
-        <strong style='color: #856404;'>Note:</strong> <span style='color: #000;'>These are the top 10 highest rated players from 2019-2026 based on the model.</span>
-    </div>
-    """, unsafe_allow_html=True)
-
-    try:
-        # Get all players from 2019-2026
-        all_players_with_ratings = []
-
-        for year in range(19, 27):  # 2019-2026
-            year_players = final_df_transform[final_df_transform['Year'] == year].copy()
-
-            for idx, player in year_players.iterrows():
-                cluster = player["PlayStyleCluster"]
-                if cluster in models_by_cluster:
-                    model_data = models_by_cluster[cluster]
-                    features = model_data["features"]
-                    scaler = model_data["scaler"]
-                    avg_coefs = model_data["avg_coefs"]
-
-                    # Calculate prediction
-                    player_features = player[features].fillna(0)
-                    player_scaled = scaler.transform(player_features.values.reshape(1, -1))
-                    logit = np.dot(player_scaled, avg_coefs)
-                    prob = 1 / (1 + np.exp(-logit))
-
-                    # Apply class year adjustment
-                    prob[0] = apply_class_adjustment(cluster, prob[0], player.get('Player_Encoded', 0))
-
-                    player_data = {
-                        'Name': player['Name'],
-                        'Team': player.get('Team', 'Unknown'),
-                        'Year': 2000 + player['Year'],
-                        'Rating': prob[0],
-                        'Height': player.get('Height', 'Unknown'),
-                        'BPM': player.get('BPM', 0)
-                    }
-                    all_players_with_ratings.append(player_data)
-
-        if all_players_with_ratings:
-            # Convert to DataFrame and get top 10
-            all_players_df = pd.DataFrame(all_players_with_ratings)
-            top_10 = all_players_df.sort_values('Rating', ascending=False).head(10)
-
-            # Display top 10
-            for i, (_, player) in enumerate(top_10.iterrows(), 1):
-                rating = player['Rating']
-
-                # Color coding based on rating
-                if rating >= 0.9:
-                    color = "#006400"
-                    bg_color = "#d4edda"
-                    badge = "ELITE"
-                elif rating >= 0.8:
-                    color = "#228b22"
-                    bg_color = "#d4edda"
-                    badge = "GREAT"
-                elif rating >= 0.7:
-                    color = "#32cd32"
-                    bg_color = "#e8f5e8"
-                    badge = "VERY GOOD"
-                elif rating >= 0.6:
-                    color = "#9acd32"
-                    bg_color = "#f0f8e8"
-                    badge = "GOOD"
-                elif rating >= 0.5:
-                    color = "#ff7f0e"
-                    bg_color = "#fff3cd"
-                    badge = "ABOVE AVERAGE"
-                elif rating >= 0.4:
-                    color = "#ffa500"
-                    bg_color = "#fff8dc"
-                    badge = "AVERAGE"
-                elif rating >= 0.3:
-                    color = "#ff6347"
-                    bg_color = "#ffe4e1"
-                    badge = "BELOW AVERAGE"
-                else:
-                    color = "#d62728"
-                    bg_color = "#f8d7da"
-                    badge = "POOR"
-
-                st.markdown(f"""
-                <div style='background-color: {bg_color}; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid {color};'>
-                    <div style='display: flex; justify-content: space-between; align-items: center;'>
-                        <div>
-                            <h3 style='color: #000; margin: 0;'>#{i}. {player['Name']}</h3>
-                            <p style='color: #666; margin: 5px 0 0 0;'>{player['Team']} | {player['Year']} | {player['Height']} | BPM: {player['BPM']:.1f}</p>
-                        </div>
-                        <div style='text-align: right;'>
-                            <div style='color: {color}; font-size: 2rem; font-weight: bold;'>{rating:.3f}</div>
-                            <span style='background-color: {color}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 0.85rem; font-weight: bold;'>{badge}</span>
-                        </div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-        else:
-            st.write("No data available")
-
-    except Exception as e:
-        st.error(f"Error calculating top ratings: {str(e)}")
 
 with tab2:  # Player Rankings
     # Header with styling
